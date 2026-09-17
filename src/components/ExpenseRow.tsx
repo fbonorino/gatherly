@@ -4,6 +4,7 @@ import {
   EXPENSE_CATEGORY_LABELS,
 } from "@/lib/types";
 import type { ExpenseData } from "./expense-types";
+import { formatCurrency } from "@/lib/currency";
 import { TableRow, TableCell } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -30,7 +31,7 @@ export default function ExpenseRow({
           {EXPENSE_CATEGORY_LABELS[expense.category]}
         </Badge>
       </TableCell>
-      <TableCell>${expense.amount.toFixed(2)}</TableCell>
+      <TableCell>{formatCurrency(expense.amount, { cents: true })}</TableCell>
       <TableCell className="text-muted-foreground">
         {expense.paidBy || <span className="text-muted-foreground">—</span>}
       </TableCell>

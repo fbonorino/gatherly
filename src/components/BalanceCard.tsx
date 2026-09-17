@@ -1,5 +1,6 @@
 import { Scale } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { formatCurrency } from "@/lib/currency";
 import type { GuestData } from "./guest-types";
 import type { ExpenseData } from "./expense-types";
 
@@ -26,11 +27,11 @@ export default function BalanceCard({
         <div className="min-w-0 flex flex-wrap items-baseline gap-x-1.5 gap-y-0.5">
           <span className="text-sm">
             Collected{" "}
-            <span className="font-semibold">${collected.toFixed(0)}</span>
+            <span className="font-semibold">{formatCurrency(collected)}</span>
           </span>
           <span className="text-muted-foreground text-sm">·</span>
           <span className="text-sm">
-            Spent <span className="font-semibold">${spent.toFixed(0)}</span>
+            Spent <span className="font-semibold">{formatCurrency(spent)}</span>
           </span>
           <span className="text-muted-foreground text-sm">·</span>
           <span className="text-sm">
@@ -40,7 +41,8 @@ export default function BalanceCard({
                 isPositive ? "text-emerald-400" : "text-rose-400"
               }`}
             >
-              {isPositive ? "+" : "-"}${Math.abs(balance).toFixed(0)}
+              {isPositive ? "+" : "-"}
+              {formatCurrency(Math.abs(balance))}
             </span>
           </span>
         </div>

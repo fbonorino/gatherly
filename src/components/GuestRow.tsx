@@ -10,6 +10,7 @@ import {
   RSVP_STATUSES,
 } from "@/lib/types";
 import { initials, type GuestData } from "./guest-types";
+import { formatCurrency } from "@/lib/currency";
 import { TableRow, TableCell } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -100,7 +101,7 @@ export default function GuestRow({
           />
           {guest.mustPay && guest.amount != null && (
             <span className="text-muted-foreground text-xs">
-              ${guest.amount}
+              {formatCurrency(guest.amount)}
             </span>
           )}
         </div>

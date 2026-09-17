@@ -4,6 +4,7 @@ import {
   EXPENSE_CATEGORY_LABELS,
 } from "@/lib/types";
 import type { ExpenseData } from "./expense-types";
+import { formatCurrency } from "@/lib/currency";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -29,7 +30,7 @@ export default function ExpenseCard({
               {expense.description}
             </p>
             <p className="font-semibold shrink-0">
-              ${expense.amount.toFixed(2)}
+              {formatCurrency(expense.amount, { cents: true })}
             </p>
           </div>
 

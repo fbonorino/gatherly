@@ -5,6 +5,7 @@ import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import type { ExpenseCategory } from "@prisma/client";
 import type { ExpenseData } from "./expense-types";
+import { formatCurrency } from "@/lib/currency";
 import ExpenseRow from "./ExpenseRow";
 import ExpenseCard from "./ExpenseCard";
 import ExpenseFormModal from "./ExpenseFormModal";
@@ -93,7 +94,9 @@ export default function ExpensesTable({
         <Card className="py-3 gap-0">
           <CardContent className="px-4">
             <p className="text-xs text-muted-foreground">Total expenses</p>
-            <p className="text-xl font-semibold">${total.toFixed(2)}</p>
+            <p className="text-xl font-semibold">
+              {formatCurrency(total, { cents: true })}
+            </p>
           </CardContent>
         </Card>
         <Button onClick={openAddModal}>

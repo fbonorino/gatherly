@@ -10,6 +10,7 @@ import {
   RSVP_STATUSES,
 } from "@/lib/types";
 import { initials, type GuestData } from "./guest-types";
+import { formatCurrency } from "@/lib/currency";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -86,7 +87,9 @@ export default function GuestCard({
                 }
                 aria-label={`Toggle must pay for ${guest.name}`}
               />
-              {guest.mustPay && guest.amount != null && `$${guest.amount}`}
+              {guest.mustPay &&
+                guest.amount != null &&
+                formatCurrency(guest.amount)}
             </span>
           </div>
 
