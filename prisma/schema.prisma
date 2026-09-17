@@ -1,0 +1,47 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum EventType {
+  BIRTHDAY
+  WEDDING
+  BACHELOR_BACHELORETTE
+  CORPORATE
+  OTHER
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+model Event {
+  id         String    @id @default(cuid())
+  name       String
+  type       EventType
+  customType String?
+  date       DateTime
+  location   String?
+  notes      String?
+  createdAt  DateTime  @default(now())
+  guests     Guest[]
+}
+
+model Guest {
+  id        String   @id @default(cuid())
+  eventId   String
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  name      String
+  gender    Gender
+  mustPay   Boolean  @default(false)
+  hasPaid   Boolean  @default(false)
+  amount    Float?
+  comments  String?
+  createdAt DateTime @default(now())
+}
