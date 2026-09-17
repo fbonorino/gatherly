@@ -4,7 +4,12 @@ import { useMemo, useState } from "react";
 import { Plus, Search } from "lucide-react";
 import { toast } from "sonner";
 import type { Gender, RsvpStatus } from "@prisma/client";
-import { GENDER_LABELS, GENDERS } from "@/lib/types";
+import {
+  GENDER_LABELS,
+  GENDERS,
+  RSVP_STATUS_LABELS,
+  RSVP_STATUSES,
+} from "@/lib/types";
 import { resolveRsvpStatus } from "@/lib/rsvp";
 import type { GuestData } from "./guest-types";
 import GuestRow from "./GuestRow";
@@ -48,6 +53,7 @@ export default function GuestTable({
   const [guests, setGuests] = useState(initialGuests);
   const [search, setSearch] = useState("");
   const [genderFilter, setGenderFilter] = useState<Gender | "ALL">("ALL");
+  const [rsvpFilter, setRsvpFilter] = useState<RsvpStatus | "ALL">("ALL");
   const [paymentFilter, setPaymentFilter] = useState<PaymentFilter>("ALL");
   const [modalOpen, setModalOpen] = useState(false);
   const [editingGuest, setEditingGuest] = useState<GuestData | undefined>();
@@ -58,11 +64,12 @@ export default function GuestTable({
         return false;
       }
       if (genderFilter !== "ALL" && g.gender !== genderFilter) return false;
+      if (rsvpFilter !== "ALL" && g.rsvpStatus !== rsvpFilter) return false;
       if (paymentFilter === "PAID" && !g.hasPaid) return false;
       if (paymentFilter === "PENDING" && g.hasPaid) return false;
       return true;
     });
-  }, [guests, search, genderFilter, paymentFilter]);
+  }, [guests, search, genderFilter, rsvpFilter, paymentFilter]);
 
   function openAddModal() {
     setEditingGuest(undefined);
@@ -174,9 +181,9 @@ export default function GuestTable({
     <div className="space-y-6">
       <SummaryBar guests={guests} />
 
-      <div className="flex flex-col sm:flex-row gap-2 sm:items-center sm:justify-between">
-        <div className="flex flex-col sm:flex-row gap-2 flex-1">
-          <div className="relative max-w-xs">
+      <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-row gap-2 lg:flex-1 min-w-0">
+          <div className="relative min-w-0 lg:max-w-xs">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
             <Input
               value={search}
@@ -189,7 +196,7 @@ export default function GuestTable({
             value={genderFilter}
             onValueChange={(v) => setGenderFilter(v as Gender | "ALL")}
           >
-            <SelectTrigger className="w-full sm:w-44">
+            <SelectTrigger className="w-full lg:w-44">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -202,10 +209,26 @@ export default function GuestTable({
             </SelectContent>
           </Select>
           <Select
+            value={rsvpFilter}
+            onValueChange={(v) => setRsvpFilter(v as RsvpStatus | "ALL")}
+          >
+            <SelectTrigger className="w-full lg:w-44">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">All RSVP status</SelectItem>
+              {RSVP_STATUSES.map((status) => (
+                <SelectItem key={status} value={status}>
+                  {RSVP_STATUS_LABELS[status]}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select
             value={paymentFilter}
             onValueChange={(v) => setPaymentFilter(v as PaymentFilter)}
           >
-            <SelectTrigger className="w-full sm:w-44">
+            <SelectTrigger className="w-full lg:w-44">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -215,7 +238,7 @@ export default function GuestTable({
             </SelectContent>
           </Select>
         </div>
-        <Button onClick={openAddModal}>
+        <Button className="w-full lg:w-auto" onClick={openAddModal}>
           <Plus />
           Add guest
         </Button>
