@@ -5,9 +5,12 @@ import { ArrowLeft, MapPin, CalendarDays } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { eventDisplayType, EVENT_TYPE_ICONS } from "@/lib/types";
 import GuestTable from "@/components/GuestTable";
+import ExpensesTable from "@/components/ExpensesTable";
+import BalanceCard from "@/components/BalanceCard";
 import EventActions from "@/components/EventActions";
 import ToastFlag from "@/components/ToastFlag";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default async function EventDetailPage({
   params,
@@ -17,7 +20,10 @@ export default async function EventDetailPage({
   const { id } = await params;
   const event = await prisma.event.findUnique({
     where: { id },
-    include: { guests: { orderBy: { createdAt: "asc" } } },
+    include: {
+      guests: { orderBy: { createdAt: "asc" } },
+      expenses: { orderBy: { createdAt: "asc" } },
+    },
   });
   if (!event) notFound();
 
@@ -82,7 +88,20 @@ export default async function EventDetailPage({
         </p>
       )}
 
-      <GuestTable eventId={event.id} initialGuests={event.guests} />
+      <BalanceCard guests={event.guests} expenses={event.expenses} />
+
+      <Tabs defaultValue="guests">
+        <TabsList>
+          <TabsTrigger value="guests">Guests</TabsTrigger>
+          <TabsTrigger value="expenses">Expenses</TabsTrigger>
+        </TabsList>
+        <TabsContent value="guests" className="pt-6">
+          <GuestTable eventId={event.id} initialGuests={event.guests} />
+        </TabsContent>
+        <TabsContent value="expenses" className="pt-6">
+          <ExpensesTable eventId={event.id} initialExpenses={event.expenses} />
+        </TabsContent>
+      </Tabs>
     </main>
   );
 }

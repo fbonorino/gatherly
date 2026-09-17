@@ -22,6 +22,15 @@ enum Gender {
   OTHER
 }
 
+enum ExpenseCategory {
+  FOOD
+  DRINKS
+  VENUE
+  ENTERTAINMENT
+  DECOR
+  OTHER
+}
+
 model Event {
   id         String    @id @default(cuid())
   name       String
@@ -32,6 +41,7 @@ model Event {
   notes      String?
   createdAt  DateTime  @default(now())
   guests     Guest[]
+  expenses   Expense[]
 }
 
 model Guest {
@@ -45,4 +55,16 @@ model Guest {
   amount    Float?
   comments  String?
   createdAt DateTime @default(now())
+}
+
+model Expense {
+  id          String          @id @default(cuid())
+  eventId     String
+  event       Event           @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  description String
+  category    ExpenseCategory @default(OTHER)
+  amount      Float
+  paidBy      String?
+  date        DateTime?
+  createdAt   DateTime        @default(now())
 }

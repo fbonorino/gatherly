@@ -1,4 +1,4 @@
-import type { EventType, Gender } from "@prisma/client";
+import type { EventType, ExpenseCategory, Gender } from "@prisma/client";
 import { Cake, Heart, PartyPopper, Briefcase, Sparkles, type LucideIcon } from "lucide-react";
 
 export const EVENT_TYPE_LABELS: Record<EventType, string> = {
@@ -36,4 +36,33 @@ export const EVENT_TYPE_ICONS: Record<EventType, LucideIcon> = {
   BACHELOR_BACHELORETTE: PartyPopper,
   CORPORATE: Briefcase,
   OTHER: Sparkles,
+};
+
+export const EXPENSE_CATEGORY_LABELS: Record<ExpenseCategory, string> = {
+  FOOD: "Food",
+  DRINKS: "Drinks",
+  VENUE: "Venue",
+  ENTERTAINMENT: "Entertainment",
+  DECOR: "Decor",
+  OTHER: "Other",
+};
+
+export const EXPENSE_CATEGORIES: ExpenseCategory[] = [
+  "FOOD",
+  "DRINKS",
+  "VENUE",
+  "ENTERTAINMENT",
+  "DECOR",
+  "OTHER",
+];
+
+// Subtle badge colors, one distinct hue per category, matching the
+// bg-{color}-500/20 text-{color}-400 style used by the Paid/Pending badges.
+export const EXPENSE_CATEGORY_BADGE_CLASSES: Record<ExpenseCategory, string> = {
+  FOOD: "bg-orange-500/20 text-orange-400",
+  DRINKS: "bg-sky-500/20 text-sky-400",
+  VENUE: "bg-violet-500/20 text-violet-400",
+  ENTERTAINMENT: "bg-pink-500/20 text-pink-400",
+  DECOR: "bg-teal-500/20 text-teal-400",
+  OTHER: "bg-zinc-500/20 text-zinc-400",
 };

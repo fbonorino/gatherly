@@ -50,10 +50,33 @@ async function main() {
           },
         ],
       },
+      expenses: {
+        create: [
+          {
+            description: "Burgers, hot dogs & sides",
+            category: "FOOD",
+            amount: 85,
+            paidBy: "Sarah",
+          },
+          {
+            description: "Beer & soda run",
+            category: "DRINKS",
+            amount: 40,
+          },
+          {
+            description: "Bluetooth speaker rental",
+            category: "ENTERTAINMENT",
+            amount: 20,
+            paidBy: "Alex",
+          },
+        ],
+      },
     },
   });
 
-  console.log(`Seeded event ${event.name} with 5 guests.`);
+  console.log(
+    `Seeded event ${event.name} with 5 guests and 3 expenses.`
+  );
 }
 
 main()
