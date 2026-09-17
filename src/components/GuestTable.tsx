@@ -16,6 +16,8 @@ import {
   updateGuest,
   deleteGuest,
   toggleGuestPaid,
+  updateGuestRsvpStatus,
+  updateGuestMustPay,
 } from "@/app/actions/guests";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -91,6 +93,42 @@ export default function GuestTable({
         );
       }
       toast.error("Couldn't update payment status");
+    }
+  }
+
+  async function handleRsvpChange(guestId: string, rsvpStatus: RsvpStatus) {
+    const previous = guests.find((g) => g.id === guestId);
+    setGuests((prev) =>
+      prev.map((g) => (g.id === guestId ? { ...g, rsvpStatus } : g))
+    );
+    try {
+      await updateGuestRsvpStatus(guestId, eventId, rsvpStatus);
+      toast.success("RSVP updated");
+    } catch {
+      if (previous) {
+        setGuests((prev) =>
+          prev.map((g) => (g.id === guestId ? previous : g))
+        );
+      }
+      toast.error("Couldn't update RSVP");
+    }
+  }
+
+  async function handleMustPayChange(guestId: string, mustPay: boolean) {
+    const previous = guests.find((g) => g.id === guestId);
+    setGuests((prev) =>
+      prev.map((g) => (g.id === guestId ? { ...g, mustPay } : g))
+    );
+    try {
+      await updateGuestMustPay(guestId, eventId, mustPay);
+      toast.success(mustPay ? "Marked as must pay" : "Marked as no payment due");
+    } catch {
+      if (previous) {
+        setGuests((prev) =>
+          prev.map((g) => (g.id === guestId ? previous : g))
+        );
+      }
+      toast.error("Couldn't update payment requirement");
     }
   }
 
@@ -190,6 +228,8 @@ export default function GuestTable({
             key={guest.id}
             guest={guest}
             onTogglePaid={handleTogglePaid}
+            onRsvpChange={handleRsvpChange}
+            onMustPayChange={handleMustPayChange}
             onEdit={openEditModal}
             onDelete={handleDelete}
           />
@@ -222,6 +262,8 @@ export default function GuestTable({
                 guest={guest}
                 index={index}
                 onTogglePaid={handleTogglePaid}
+                onRsvpChange={handleRsvpChange}
+                onMustPayChange={handleMustPayChange}
                 onEdit={openEditModal}
                 onDelete={handleDelete}
               />

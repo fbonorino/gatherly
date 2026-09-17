@@ -69,3 +69,33 @@ export async function toggleGuestPaid(guestId: string, eventId: string, hasPaid:
   revalidatePath(`/events/${eventId}`);
   return guest;
 }
+
+export async function updateGuestRsvpStatus(
+  guestId: string,
+  eventId: string,
+  rsvpStatus: RsvpStatus
+) {
+  const existing = await prisma.guest.findUniqueOrThrow({
+    where: { id: guestId },
+    select: { hasPaid: true },
+  });
+  const guest = await prisma.guest.update({
+    where: { id: guestId },
+    data: { rsvpStatus: resolveRsvpStatus(existing.hasPaid, rsvpStatus) },
+  });
+  revalidatePath(`/events/${eventId}`);
+  return guest;
+}
+
+export async function updateGuestMustPay(
+  guestId: string,
+  eventId: string,
+  mustPay: boolean
+) {
+  const guest = await prisma.guest.update({
+    where: { id: guestId },
+    data: { mustPay },
+  });
+  revalidatePath(`/events/${eventId}`);
+  return guest;
+}

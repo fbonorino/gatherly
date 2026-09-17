@@ -2,17 +2,33 @@
 
 import { useTransition } from "react";
 import { Pencil } from "lucide-react";
-import { GENDER_LABELS, RSVP_STATUS_BADGE_CLASSES, RSVP_STATUS_LABELS } from "@/lib/types";
+import type { RsvpStatus } from "@prisma/client";
+import {
+  GENDER_LABELS,
+  RSVP_STATUS_BADGE_CLASSES,
+  RSVP_STATUS_LABELS,
+  RSVP_STATUSES,
+} from "@/lib/types";
 import { initials, type GuestData } from "./guest-types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import DeleteGuestAction from "./DeleteGuestAction";
 
 type GuestCardProps = {
   guest: GuestData;
   onTogglePaid: (guestId: string, hasPaid: boolean) => void;
+  onRsvpChange: (guestId: string, rsvpStatus: RsvpStatus) => void;
+  onMustPayChange: (guestId: string, mustPay: boolean) => void;
   onEdit: (guest: GuestData) => void;
   onDelete: (guestId: string) => void;
 };
@@ -20,6 +36,8 @@ type GuestCardProps = {
 export default function GuestCard({
   guest,
   onTogglePaid,
+  onRsvpChange,
+  onMustPayChange,
   onEdit,
   onDelete,
 }: GuestCardProps) {
@@ -55,19 +73,50 @@ export default function GuestCard({
             </button>
           </div>
 
-          <p className="text-xs text-muted-foreground">
-            {GENDER_LABELS[guest.gender]}
-            {" · "}
-            {guest.mustPay ? (
-              <>Must pay{guest.amount != null ? ` ($${guest.amount})` : ""}</>
-            ) : (
-              "No payment due"
-            )}
-          </p>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <span>{GENDER_LABELS[guest.gender]}</span>
+            <span>·</span>
+            <span className="flex items-center gap-1.5">
+              Must pay
+              <Switch
+                size="sm"
+                checked={guest.mustPay}
+                onCheckedChange={(checked) =>
+                  startTransition(() => onMustPayChange(guest.id, checked))
+                }
+                aria-label={`Toggle must pay for ${guest.name}`}
+              />
+              {guest.mustPay && guest.amount != null && `$${guest.amount}`}
+            </span>
+          </div>
 
-          <Badge className={RSVP_STATUS_BADGE_CLASSES[guest.rsvpStatus]}>
-            {RSVP_STATUS_LABELS[guest.rsvpStatus]}
-          </Badge>
+          <Select
+            value={guest.rsvpStatus}
+            onValueChange={(value) =>
+              startTransition(() =>
+                onRsvpChange(guest.id, value as RsvpStatus)
+              )
+            }
+          >
+            <SelectTrigger className="h-auto w-fit border-0 bg-transparent p-0 shadow-none hover:opacity-80 dark:bg-transparent dark:hover:bg-transparent [&_svg]:hidden">
+              <SelectValue>
+                {() => (
+                  <Badge
+                    className={`cursor-pointer ${RSVP_STATUS_BADGE_CLASSES[guest.rsvpStatus]}`}
+                  >
+                    {RSVP_STATUS_LABELS[guest.rsvpStatus]}
+                  </Badge>
+                )}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              {RSVP_STATUSES.map((status) => (
+                <SelectItem key={status} value={status}>
+                  {RSVP_STATUS_LABELS[status]}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
           {guest.comments && (
             <p className="text-xs text-muted-foreground truncate">
