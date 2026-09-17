@@ -71,6 +71,12 @@ export default function GuestTable({
     });
   }, [guests, search, genderFilter, rsvpFilter, paymentFilter]);
 
+  const hasActiveFilters =
+    search !== "" ||
+    genderFilter !== "ALL" ||
+    rsvpFilter !== "ALL" ||
+    paymentFilter !== "ALL";
+
   function openAddModal() {
     setEditingGuest(undefined);
     setModalOpen(true);
@@ -243,6 +249,12 @@ export default function GuestTable({
           Add guest
         </Button>
       </div>
+
+      <p className="text-sm text-zinc-400 break-words">
+        {hasActiveFilters
+          ? `Showing ${filteredGuests.length} of ${guests.length} guests`
+          : `${guests.length} guests`}
+      </p>
 
       {/* Mobile: stacked cards */}
       <div className="sm:hidden space-y-2">
