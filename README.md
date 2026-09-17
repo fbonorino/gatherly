@@ -1,3 +1,16 @@
+# Gatherly
+
+Gatherly is an event guest-management app for tracking who's coming and who's paid. Create an event (birthday, wedding, bachelor/bachelorette, corporate, or other), then manage its guest list and expenses from one dashboard:
+
+- **Guests** — track name, gender, RSVP status (pending/confirmed/declined), whether payment is required, and whether they've paid, with inline editing and search/filter by name, gender, RSVP status, and payment status.
+- **Expenses** — log event costs by category (food, drinks, venue, entertainment, decor, other), who paid, and when.
+- **Summary stats** — at-a-glance totals for guest count, confirmed RSVPs, and payment status.
+- **Export** — pull guest/expense data out of an event.
+
+Built with Next.js (App Router), Prisma, and PostgreSQL, and deployed on Vercel.
+
+---
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
