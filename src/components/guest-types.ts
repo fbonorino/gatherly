@@ -1,4 +1,4 @@
-import type { Gender } from "@prisma/client";
+import type { Gender, RsvpStatus } from "@prisma/client";
 
 export type GuestData = {
   id: string;
@@ -7,6 +7,7 @@ export type GuestData = {
   gender: Gender;
   mustPay: boolean;
   hasPaid: boolean;
+  rsvpStatus: RsvpStatus;
   amount: number | null;
   comments: string | null;
 };

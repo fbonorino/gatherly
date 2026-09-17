@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import type { Gender } from "@prisma/client";
+import type { Gender, RsvpStatus } from "@prisma/client";
 import { Loader2 } from "lucide-react";
-import { GENDER_LABELS, GENDERS } from "@/lib/types";
+import { GENDER_LABELS, GENDERS, RSVP_STATUS_LABELS, RSVP_STATUSES } from "@/lib/types";
+import { resolveRsvpStatus } from "@/lib/rsvp";
 import type { GuestData } from "./guest-types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,6 +35,7 @@ type GuestFormModalProps = {
     gender: Gender;
     mustPay: boolean;
     hasPaid: boolean;
+    rsvpStatus: RsvpStatus;
     amount: number | null;
     comments: string | null;
   }) => Promise<void>;
@@ -49,6 +51,9 @@ export default function GuestFormModal({
   const [gender, setGender] = useState<Gender>(initial?.gender ?? "OTHER");
   const [mustPay, setMustPay] = useState(initial?.mustPay ?? false);
   const [hasPaid, setHasPaid] = useState(initial?.hasPaid ?? false);
+  const [rsvpStatus, setRsvpStatus] = useState<RsvpStatus>(
+    initial?.rsvpStatus ?? "PENDING"
+  );
   const [amount, setAmount] = useState(
     initial?.amount != null ? String(initial.amount) : ""
   );
@@ -68,6 +73,7 @@ export default function GuestFormModal({
       setGender(initial?.gender ?? "OTHER");
       setMustPay(initial?.mustPay ?? false);
       setHasPaid(initial?.hasPaid ?? false);
+      setRsvpStatus(initial?.rsvpStatus ?? "PENDING");
       setAmount(initial?.amount != null ? String(initial.amount) : "");
       setComments(initial?.comments ?? "");
       setError(null);
@@ -88,6 +94,7 @@ export default function GuestFormModal({
         gender,
         mustPay,
         hasPaid,
+        rsvpStatus: resolveRsvpStatus(hasPaid, rsvpStatus),
         amount: amount.trim() ? Number(amount) : null,
         comments: comments.trim() || null,
       });
@@ -151,9 +158,42 @@ export default function GuestFormModal({
               <Switch
                 id="guest-has-paid"
                 checked={hasPaid}
-                onCheckedChange={setHasPaid}
+                onCheckedChange={(checked) => {
+                  setHasPaid(checked);
+                  // Paying implies attending: reflect the forced CONFIRMED
+                  // in the RSVP select immediately, not just on submit.
+                  setRsvpStatus((current) => resolveRsvpStatus(checked, current));
+                }}
               />
             </div>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="guest-rsvp">RSVP status</Label>
+            <Select
+              value={rsvpStatus}
+              onValueChange={(v) => setRsvpStatus(v as RsvpStatus)}
+            >
+              <SelectTrigger id="guest-rsvp" className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {RSVP_STATUSES.map((status) => (
+                  <SelectItem
+                    key={status}
+                    value={status}
+                    disabled={status === "DECLINED" && hasPaid}
+                  >
+                    {RSVP_STATUS_LABELS[status]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {hasPaid && (
+              <p className="text-xs text-muted-foreground">
+                Marked as paid, so RSVP is confirmed.
+              </p>
+            )}
           </div>
 
           <div className="flex flex-col gap-2">

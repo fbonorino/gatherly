@@ -31,6 +31,12 @@ enum ExpenseCategory {
   OTHER
 }
 
+enum RsvpStatus {
+  PENDING
+  CONFIRMED
+  DECLINED
+}
+
 model Event {
   id         String    @id @default(cuid())
   name       String
@@ -45,16 +51,17 @@ model Event {
 }
 
 model Guest {
-  id        String   @id @default(cuid())
-  eventId   String
-  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  name      String
-  gender    Gender
-  mustPay   Boolean  @default(false)
-  hasPaid   Boolean  @default(false)
-  amount    Float?
-  comments  String?
-  createdAt DateTime @default(now())
+  id         String     @id @default(cuid())
+  eventId    String
+  event      Event      @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  name       String
+  gender     Gender
+  mustPay    Boolean    @default(false)
+  hasPaid    Boolean    @default(false)
+  rsvpStatus RsvpStatus @default(PENDING)
+  amount     Float?
+  comments   String?
+  createdAt  DateTime   @default(now())
 }
 
 model Expense {

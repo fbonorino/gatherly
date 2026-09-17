@@ -17,6 +17,7 @@ async function main() {
             gender: "MALE",
             mustPay: true,
             hasPaid: true,
+            rsvpStatus: "CONFIRMED",
             amount: 15,
             comments: "Vegetarian",
           },
@@ -25,6 +26,7 @@ async function main() {
             gender: "FEMALE",
             mustPay: true,
             hasPaid: false,
+            rsvpStatus: "PENDING",
             amount: 15,
           },
           {
@@ -32,12 +34,14 @@ async function main() {
             gender: "OTHER",
             mustPay: false,
             hasPaid: false,
+            rsvpStatus: "DECLINED",
           },
           {
             name: "Priya Patel",
             gender: "FEMALE",
             mustPay: true,
             hasPaid: true,
+            rsvpStatus: "CONFIRMED",
             amount: 15,
           },
           {
@@ -45,6 +49,7 @@ async function main() {
             gender: "MALE",
             mustPay: true,
             hasPaid: false,
+            rsvpStatus: "PENDING",
             amount: 15,
             comments: "Bringing +1",
           },

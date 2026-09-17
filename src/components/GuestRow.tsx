@@ -2,7 +2,7 @@
 
 import { useTransition } from "react";
 import { Pencil } from "lucide-react";
-import { GENDER_LABELS } from "@/lib/types";
+import { GENDER_LABELS, RSVP_STATUS_BADGE_CLASSES, RSVP_STATUS_LABELS } from "@/lib/types";
 import { initials, type GuestData } from "./guest-types";
 import { TableRow, TableCell } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -41,6 +41,11 @@ export default function GuestRow({
       </TableCell>
       <TableCell className="text-muted-foreground">
         {GENDER_LABELS[guest.gender]}
+      </TableCell>
+      <TableCell>
+        <Badge className={RSVP_STATUS_BADGE_CLASSES[guest.rsvpStatus]}>
+          {RSVP_STATUS_LABELS[guest.rsvpStatus]}
+        </Badge>
       </TableCell>
       <TableCell className="text-center">
         {guest.mustPay ? (

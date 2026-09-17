@@ -3,8 +3,9 @@
 import { useMemo, useState } from "react";
 import { Plus, Search } from "lucide-react";
 import { toast } from "sonner";
-import type { Gender } from "@prisma/client";
+import type { Gender, RsvpStatus } from "@prisma/client";
 import { GENDER_LABELS, GENDERS } from "@/lib/types";
+import { resolveRsvpStatus } from "@/lib/rsvp";
 import type { GuestData } from "./guest-types";
 import GuestRow from "./GuestRow";
 import GuestCard from "./GuestCard";
@@ -72,16 +73,23 @@ export default function GuestTable({
   }
 
   async function handleTogglePaid(guestId: string, hasPaid: boolean) {
+    const previous = guests.find((g) => g.id === guestId);
     setGuests((prev) =>
-      prev.map((g) => (g.id === guestId ? { ...g, hasPaid } : g))
+      prev.map((g) =>
+        g.id === guestId
+          ? { ...g, hasPaid, rsvpStatus: resolveRsvpStatus(hasPaid, g.rsvpStatus) }
+          : g
+      )
     );
     try {
       await toggleGuestPaid(guestId, eventId, hasPaid);
       toast.success(hasPaid ? "Marked as paid" : "Marked as pending");
     } catch {
-      setGuests((prev) =>
-        prev.map((g) => (g.id === guestId ? { ...g, hasPaid: !hasPaid } : g))
-      );
+      if (previous) {
+        setGuests((prev) =>
+          prev.map((g) => (g.id === guestId ? previous : g))
+        );
+      }
       toast.error("Couldn't update payment status");
     }
   }
@@ -104,6 +112,7 @@ export default function GuestTable({
     gender: Gender;
     mustPay: boolean;
     hasPaid: boolean;
+    rsvpStatus: RsvpStatus;
     amount: number | null;
     comments: string | null;
   }) {
@@ -194,11 +203,12 @@ export default function GuestTable({
 
       {/* Desktop/tablet: table */}
       <div className="hidden sm:block border border-border rounded-lg overflow-x-auto">
-        <Table className="min-w-[560px]">
+        <Table className="min-w-[660px]">
           <TableHeader>
             <TableRow>
               <TableHead>Name</TableHead>
               <TableHead>Gender</TableHead>
+              <TableHead>RSVP</TableHead>
               <TableHead className="text-center">Must pay</TableHead>
               <TableHead className="text-center">Paid</TableHead>
               <TableHead>Comments</TableHead>

@@ -1,4 +1,4 @@
-import type { EventType, ExpenseCategory, Gender } from "@prisma/client";
+import type { EventType, ExpenseCategory, Gender, RsvpStatus } from "@prisma/client";
 import { Cake, Heart, PartyPopper, Briefcase, Sparkles, type LucideIcon } from "lucide-react";
 
 export const EVENT_TYPE_LABELS: Record<EventType, string> = {
@@ -24,6 +24,20 @@ export const GENDER_LABELS: Record<Gender, string> = {
 };
 
 export const GENDERS: Gender[] = ["MALE", "FEMALE", "OTHER"];
+
+export const RSVP_STATUS_LABELS: Record<RsvpStatus, string> = {
+  PENDING: "Pending",
+  CONFIRMED: "Confirmed",
+  DECLINED: "Declined",
+};
+
+export const RSVP_STATUSES: RsvpStatus[] = ["PENDING", "CONFIRMED", "DECLINED"];
+
+export const RSVP_STATUS_BADGE_CLASSES: Record<RsvpStatus, string> = {
+  PENDING: "bg-zinc-500/20 text-zinc-400",
+  CONFIRMED: "bg-emerald-500/20 text-emerald-400",
+  DECLINED: "bg-rose-500/20 text-rose-400",
+};
 
 export function eventDisplayType(type: EventType, customType?: string | null) {
   if (type === "OTHER" && customType) return customType;

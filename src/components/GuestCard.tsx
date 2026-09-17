@@ -2,7 +2,7 @@
 
 import { useTransition } from "react";
 import { Pencil } from "lucide-react";
-import { GENDER_LABELS } from "@/lib/types";
+import { GENDER_LABELS, RSVP_STATUS_BADGE_CLASSES, RSVP_STATUS_LABELS } from "@/lib/types";
 import { initials, type GuestData } from "./guest-types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -64,6 +64,10 @@ export default function GuestCard({
               "No payment due"
             )}
           </p>
+
+          <Badge className={RSVP_STATUS_BADGE_CLASSES[guest.rsvpStatus]}>
+            {RSVP_STATUS_LABELS[guest.rsvpStatus]}
+          </Badge>
 
           {guest.comments && (
             <p className="text-xs text-muted-foreground truncate">
