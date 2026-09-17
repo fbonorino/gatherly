@@ -7,6 +7,7 @@ import type { Gender } from "@prisma/client";
 import { GENDER_LABELS, GENDERS } from "@/lib/types";
 import type { GuestData } from "./guest-types";
 import GuestRow from "./GuestRow";
+import GuestCard from "./GuestCard";
 import GuestFormModal from "./GuestFormModal";
 import SummaryBar from "./SummaryBar";
 import {
@@ -173,7 +174,26 @@ export default function GuestTable({
         </Button>
       </div>
 
-      <div className="border border-border rounded-lg overflow-x-auto">
+      {/* Mobile: stacked cards */}
+      <div className="sm:hidden space-y-2">
+        {filteredGuests.map((guest) => (
+          <GuestCard
+            key={guest.id}
+            guest={guest}
+            onTogglePaid={handleTogglePaid}
+            onEdit={openEditModal}
+            onDelete={handleDelete}
+          />
+        ))}
+        {filteredGuests.length === 0 && (
+          <p className="text-center text-muted-foreground py-8 text-sm border border-border rounded-lg">
+            No guests match your filters.
+          </p>
+        )}
+      </div>
+
+      {/* Desktop/tablet: table */}
+      <div className="hidden sm:block border border-border rounded-lg overflow-x-auto">
         <Table className="min-w-[560px]">
           <TableHeader>
             <TableRow>

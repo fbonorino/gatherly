@@ -6,19 +6,23 @@ function StatCard({
   icon: Icon,
   label,
   value,
+  wide = false,
 }: {
   icon: React.ElementType;
   label: string;
   value: React.ReactNode;
+  wide?: boolean;
 }) {
   return (
-    <Card className="py-4 gap-0">
+    <Card className={`py-4 gap-0 ${wide ? "col-span-2 sm:col-span-1" : ""}`}>
       <CardContent className="px-4 flex items-center gap-3">
         <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
           <Icon className="size-4" />
         </div>
         <div className="min-w-0">
-          <p className="text-lg font-semibold leading-tight truncate">{value}</p>
+          <p className="text-lg font-semibold leading-tight whitespace-nowrap">
+            {value}
+          </p>
           <p className="text-xs text-muted-foreground truncate">{label}</p>
         </div>
       </CardContent>
@@ -49,6 +53,7 @@ export default function SummaryBar({ guests }: { guests: GuestData[] }) {
       <StatCard
         icon={CircleDollarSign}
         label="Collected / Pending"
+        wide
         value={
           <span>
             <span className="text-emerald-400">${collected.toFixed(0)}</span>

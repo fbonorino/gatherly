@@ -1,24 +1,14 @@
 "use client";
 
 import { useTransition } from "react";
-import { Pencil, Trash2, Loader2 } from "lucide-react";
+import { Pencil } from "lucide-react";
 import { GENDER_LABELS } from "@/lib/types";
-import type { GuestData } from "./guest-types";
+import { initials, type GuestData } from "./guest-types";
 import { TableRow, TableCell } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+import DeleteGuestAction from "./DeleteGuestAction";
 
 type GuestRowProps = {
   guest: GuestData;
@@ -28,15 +18,6 @@ type GuestRowProps = {
   onDelete: (guestId: string) => void;
 };
 
-function initials(name: string) {
-  return name
-    .trim()
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
-    .join("");
-}
-
 export default function GuestRow({
   guest,
   index,
@@ -45,7 +26,6 @@ export default function GuestRow({
   onDelete,
 }: GuestRowProps) {
   const [, startTransition] = useTransition();
-  const [isDeleting, startDelete] = useTransition();
 
   return (
     <TableRow className={index % 2 === 1 ? "bg-muted/50" : undefined}>
@@ -101,39 +81,10 @@ export default function GuestRow({
           >
             <Pencil />
           </Button>
-          <AlertDialog>
-            <AlertDialogTrigger
-              render={
-                <Button
-                  variant="ghost"
-                  size="icon-sm"
-                  aria-label={`Remove ${guest.name}`}
-                />
-              }
-            >
-              <Trash2 />
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Remove {guest.name}?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This will remove them from the guest list. This action
-                  can&apos;t be undone.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction
-                  disabled={isDeleting}
-                  onClick={() => startDelete(() => onDelete(guest.id))}
-                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                >
-                  {isDeleting ? <Loader2 className="animate-spin" /> : <Trash2 />}
-                  Remove
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+          <DeleteGuestAction
+            guestName={guest.name}
+            onDelete={() => onDelete(guest.id)}
+          />
         </div>
       </TableCell>
     </TableRow>

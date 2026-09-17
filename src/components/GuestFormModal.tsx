@@ -56,8 +56,14 @@ export default function GuestFormModal({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  function resetToInitial(nextOpen: boolean) {
-    if (nextOpen) {
+  // Re-sync form fields from `initial` every time the dialog transitions to
+  // open, whether it was opened by the parent (Edit click) or internally by
+  // Base UI. Adjusting state during render (rather than in an effect) avoids
+  // an extra commit — see https://react.dev/learn/you-might-not-need-an-effect
+  const [wasOpen, setWasOpen] = useState(open);
+  if (open !== wasOpen) {
+    setWasOpen(open);
+    if (open) {
       setName(initial?.name ?? "");
       setGender(initial?.gender ?? "OTHER");
       setMustPay(initial?.mustPay ?? false);
@@ -66,7 +72,6 @@ export default function GuestFormModal({
       setComments(initial?.comments ?? "");
       setError(null);
     }
-    onOpenChange(nextOpen);
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -95,7 +100,7 @@ export default function GuestFormModal({
   }
 
   return (
-    <Dialog open={open} onOpenChange={resetToInitial}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>{initial ? "Edit guest" : "Add guest"}</DialogTitle>
@@ -185,7 +190,7 @@ export default function GuestFormModal({
             <Button
               type="button"
               variant="outline"
-              onClick={() => resetToInitial(false)}
+              onClick={() => onOpenChange(false)}
             >
               Cancel
             </Button>
