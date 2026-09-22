@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Plus, Search } from "lucide-react";
+import { Plus, Search, Download } from "lucide-react";
 import { toast } from "sonner";
 import type { Gender, RsvpStatus } from "@prisma/client";
 import {
@@ -76,6 +76,16 @@ export default function GuestTable({
     genderFilter !== "ALL" ||
     rsvpFilter !== "ALL" ||
     paymentFilter !== "ALL";
+
+  const exportHref = useMemo(() => {
+    const params = new URLSearchParams();
+    if (search) params.set("search", search);
+    if (genderFilter !== "ALL") params.set("gender", genderFilter);
+    if (rsvpFilter !== "ALL") params.set("rsvp", rsvpFilter);
+    if (paymentFilter !== "ALL") params.set("payment", paymentFilter);
+    const qs = params.toString();
+    return `/events/${eventId}/export${qs ? `?${qs}` : ""}`;
+  }, [eventId, search, genderFilter, rsvpFilter, paymentFilter]);
 
   function openAddModal() {
     setEditingGuest(undefined);
@@ -244,10 +254,20 @@ export default function GuestTable({
             </SelectContent>
           </Select>
         </div>
-        <Button className="w-full lg:w-auto" onClick={openAddModal}>
-          <Plus />
-          Add guest
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            className="flex-1 lg:flex-none"
+            variant="outline"
+            render={<a href={exportHref} />}
+          >
+            <Download />
+            Export CSV
+          </Button>
+          <Button className="flex-1 lg:flex-none" onClick={openAddModal}>
+            <Plus />
+            Add guest
+          </Button>
+        </div>
       </div>
 
       <p className="text-sm text-zinc-400 break-words">

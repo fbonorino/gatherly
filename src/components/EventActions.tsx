@@ -2,7 +2,7 @@
 
 import { useTransition } from "react";
 import Link from "next/link";
-import { Pencil, MoreVertical, Download, Copy, Trash2, Loader2 } from "lucide-react";
+import { Pencil, MoreVertical, Copy, Trash2, Loader2 } from "lucide-react";
 import { duplicateEvent, deleteEvent } from "@/app/actions/events";
 import { Button } from "@/components/ui/button";
 import {
@@ -39,10 +39,6 @@ export default function EventActions({ eventId }: { eventId: string }) {
           <MoreVertical />
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem render={<a href={`/events/${eventId}/export`} />}>
-            <Download />
-            Export CSV
-          </DropdownMenuItem>
           <DropdownMenuItem
             disabled={isDuplicating}
             closeOnClick

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
+import type { Gender, RsvpStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { GENDER_LABELS } from "@/lib/types";
+import { GENDER_LABELS, GENDERS, RSVP_STATUSES } from "@/lib/types";
 
 function csvEscape(value: string) {
   if (/[",\n]/.test(value)) {
@@ -10,7 +11,7 @@ function csvEscape(value: string) {
 }
 
 export async function GET(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
@@ -22,6 +23,32 @@ export async function GET(
   if (!event) {
     return NextResponse.json({ error: "Event not found" }, { status: 404 });
   }
+
+  // Mirrors the filtering logic in GuestTable.tsx so the export matches
+  // whatever the guest table currently shows.
+  const searchParams = new URL(req.url).searchParams;
+  const search = searchParams.get("search")?.toLowerCase() ?? "";
+  const genderParam = searchParams.get("gender");
+  const rsvpParam = searchParams.get("rsvp");
+  const paymentParam = searchParams.get("payment");
+
+  const genderFilter = GENDERS.includes(genderParam as Gender)
+    ? (genderParam as Gender)
+    : null;
+  const rsvpFilter = RSVP_STATUSES.includes(rsvpParam as RsvpStatus)
+    ? (rsvpParam as RsvpStatus)
+    : null;
+  const paymentFilter =
+    paymentParam === "PAID" || paymentParam === "PENDING" ? paymentParam : null;
+
+  const guests = event.guests.filter((g) => {
+    if (search && !g.name.toLowerCase().includes(search)) return false;
+    if (genderFilter && g.gender !== genderFilter) return false;
+    if (rsvpFilter && g.rsvpStatus !== rsvpFilter) return false;
+    if (paymentFilter === "PAID" && !g.hasPaid) return false;
+    if (paymentFilter === "PENDING" && g.hasPaid) return false;
+    return true;
+  });
 
   const header = [
     "Name",
@@ -37,7 +64,7 @@ export async function GET(
   let totalRecaudado = 0;
   let totalPendiente = 0;
 
-  const rows = event.guests.map((g) => {
+  const rows = guests.map((g) => {
     const amount = g.amount ?? 0;
     const paidAmount = g.hasPaid ? amount : 0;
     const balance = amount - paidAmount;
@@ -60,7 +87,7 @@ export async function GET(
   });
 
   const totalsRow = [
-    `Total guests: ${event.guests.length}`,
+    `Total guests: ${guests.length}`,
     "",
     "",
     "",
