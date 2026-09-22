@@ -30,21 +30,52 @@ export async function GET(
     "Paid",
     "Amount",
     "Comments",
+    "Balance",
+    "Status",
   ];
-  const rows = event.guests.map((g) => [
-    g.name,
-    GENDER_LABELS[g.gender],
-    g.mustPay ? "Yes" : "No",
-    g.hasPaid ? "Yes" : "No",
-    g.amount != null ? String(g.amount) : "",
-    g.comments ?? "",
-  ]);
 
-  const csv = [header, ...rows]
+  let totalRecaudado = 0;
+  let totalPendiente = 0;
+
+  const rows = event.guests.map((g) => {
+    const amount = g.amount ?? 0;
+    const paidAmount = g.hasPaid ? amount : 0;
+    const balance = amount - paidAmount;
+
+    const status = !g.mustPay ? "Exento" : g.hasPaid ? "Pagado" : "Pendiente";
+
+    totalRecaudado += paidAmount;
+    if (g.mustPay && !g.hasPaid) totalPendiente += balance;
+
+    return [
+      g.name,
+      GENDER_LABELS[g.gender],
+      g.mustPay ? "Yes" : "No",
+      g.hasPaid ? "Yes" : "No",
+      g.amount != null ? String(g.amount) : "",
+      g.comments ?? "",
+      String(balance),
+      status,
+    ];
+  });
+
+  const totalsRow = [
+    `Total guests: ${event.guests.length}`,
+    "",
+    "",
+    "",
+    "",
+    "",
+    `Recaudado: ${totalRecaudado}`,
+    `Pendiente: ${totalPendiente}`,
+  ];
+
+  const csv = [header, ...rows, totalsRow]
     .map((row) => row.map((cell) => csvEscape(String(cell))).join(","))
     .join("\n");
 
-  const filename = `${event.name.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}-guests.csv`;
+  const exportDate = new Date().toISOString().slice(0, 10);
+  const filename = `${event.name.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}-guests-${exportDate}.csv`;
 
   return new NextResponse(csv, {
     headers: {
