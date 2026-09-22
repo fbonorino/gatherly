@@ -102,7 +102,16 @@ export async function GET(
     .join("\n");
 
   const exportDate = new Date().toISOString().slice(0, 10);
-  const filename = `${event.name.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}-guests-${exportDate}.csv`;
+  const filterSuffixParts = [
+    search && "search",
+    genderFilter,
+    rsvpFilter,
+    paymentFilter,
+  ].filter(Boolean);
+  const filterSuffix = filterSuffixParts.length
+    ? `-${filterSuffixParts.join("-").toLowerCase()}`
+    : "";
+  const filename = `${event.name.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}-guests${filterSuffix}-${exportDate}.csv`;
 
   return new NextResponse(csv, {
     headers: {

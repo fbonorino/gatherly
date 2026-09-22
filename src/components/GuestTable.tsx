@@ -258,6 +258,7 @@ export default function GuestTable({
           <Button
             className="flex-1 lg:flex-none"
             variant="outline"
+            nativeButton={false}
             render={<a href={exportHref} />}
           >
             <Download />
