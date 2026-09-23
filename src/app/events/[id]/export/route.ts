@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { Gender, RsvpStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { owesPayment } from "@/lib/rsvp";
 import { GENDER_LABELS, GENDERS, RSVP_STATUSES } from "@/lib/types";
 
 function csvEscape(value: string) {
@@ -67,12 +68,19 @@ export async function GET(
   const rows = guests.map((g) => {
     const amount = g.amount ?? 0;
     const paidAmount = g.hasPaid ? amount : 0;
-    const balance = amount - paidAmount;
+    const owes = owesPayment(g);
+    const balance = owes ? amount - paidAmount : 0;
 
-    const status = !g.mustPay ? "Exento" : g.hasPaid ? "Pagado" : "Pendiente";
+    const status = !g.mustPay
+      ? "Exento"
+      : !owes
+        ? "Declinado"
+        : g.hasPaid
+          ? "Pagado"
+          : "Pendiente";
 
     totalRecaudado += paidAmount;
-    if (g.mustPay && !g.hasPaid) totalPendiente += balance;
+    if (owes && !g.hasPaid) totalPendiente += balance;
 
     return [
       g.name,

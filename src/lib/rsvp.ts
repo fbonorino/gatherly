@@ -16,3 +16,15 @@ export function resolveRsvpStatus(
 ): RsvpStatus {
   return hasPaid ? "CONFIRMED" : requestedStatus;
 }
+
+/**
+ * Whether a guest's payment still counts toward the event's money metrics.
+ * A guest who declined isn't attending, so they're not expected to pay even
+ * if mustPay is on - their amount is excluded from "must pay" and "pending".
+ */
+export function owesPayment(guest: {
+  mustPay: boolean;
+  rsvpStatus: RsvpStatus;
+}): boolean {
+  return guest.mustPay && guest.rsvpStatus !== "DECLINED";
+}

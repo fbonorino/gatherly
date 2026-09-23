@@ -2,6 +2,7 @@ import { Users, CircleDollarSign, CheckCircle2, Wallet, UserCheck } from "lucide
 import { Card, CardContent } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/currency";
 import { cn } from "cn";
+import { owesPayment } from "@/lib/rsvp";
 import type { GuestData } from "./guest-types";
 
 function StatCard({
@@ -51,7 +52,7 @@ function StatCard({
 
 export default function SummaryBar({ guests }: { guests: GuestData[] }) {
   const total = guests.length;
-  const mustPay = guests.filter((g) => g.mustPay);
+  const mustPay = guests.filter(owesPayment);
   const paidCount = guests.filter((g) => g.hasPaid).length;
   const confirmedCount = guests.filter((g) => g.rsvpStatus === "CONFIRMED").length;
   const collected = mustPay
