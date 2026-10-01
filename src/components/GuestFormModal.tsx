@@ -5,6 +5,7 @@ import type { Gender, RsvpStatus } from "@prisma/client";
 import { Loader2 } from "lucide-react";
 import { GENDER_LABELS, GENDERS, RSVP_STATUS_LABELS, RSVP_STATUSES } from "@/lib/types";
 import { resolveRsvpStatus } from "@/lib/rsvp";
+import { canOwePayment } from "@/lib/payments";
 import type { GuestData } from "./guest-types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -80,6 +81,8 @@ export default function GuestFormModal({
     }
   }
 
+  const canOwe = canOwePayment(rsvpStatus);
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!name.trim()) {
@@ -142,15 +145,26 @@ export default function GuestFormModal({
 
           <div className="flex flex-col gap-3 rounded-lg border border-border p-3">
             <div className="flex items-center justify-between">
-              <Label htmlFor="guest-must-pay" className="font-normal">
+              <Label
+                htmlFor="guest-must-pay"
+                className={`font-normal ${canOwe ? "" : "text-muted-foreground"}`}
+              >
                 Must pay
               </Label>
+              {/* Disabled (not reset) for non-confirmed guests: the stored
+                  value is kept so it applies again once they confirm. */}
               <Switch
                 id="guest-must-pay"
-                checked={mustPay}
+                checked={canOwe && mustPay}
+                disabled={!canOwe}
                 onCheckedChange={setMustPay}
               />
             </div>
+            {!canOwe && (
+              <p className="text-xs text-muted-foreground -mt-2">
+                Only confirmed guests can owe a payment.
+              </p>
+            )}
             <div className="flex items-center justify-between">
               <Label htmlFor="guest-has-paid" className="font-normal">
                 Has paid
@@ -202,6 +216,7 @@ export default function GuestFormModal({
             </Label>
             <Input
               id="guest-amount"
+              disabled={!canOwe}
               type="number"
               min="0"
               step="0.01"

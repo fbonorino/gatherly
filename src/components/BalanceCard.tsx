@@ -1,6 +1,7 @@
 import { Scale } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/currency";
+import { computePaymentStats } from "@/lib/payments";
 import type { GuestData } from "./guest-types";
 import type { ExpenseData } from "./expense-types";
 
@@ -11,9 +12,8 @@ export default function BalanceCard({
   guests: GuestData[];
   expenses: ExpenseData[];
 }) {
-  const collected = guests
-    .filter((g) => g.mustPay && g.hasPaid)
-    .reduce((sum, g) => sum + (g.amount ?? 0), 0);
+  // Same calculation as the Guests tab's "collected" stat (SummaryBar).
+  const { collected } = computePaymentStats(guests);
   const spent = expenses.reduce((sum, e) => sum + e.amount, 0);
   const balance = collected - spent;
   const isPositive = balance >= 0;

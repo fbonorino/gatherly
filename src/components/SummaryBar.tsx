@@ -2,7 +2,7 @@ import { Users, CircleDollarSign, CheckCircle2, Wallet, UserCheck } from "lucide
 import { Card, CardContent } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/currency";
 import { cn } from "cn";
-import { owesPayment } from "@/lib/rsvp";
+import { computePaymentStats } from "@/lib/payments";
 import type { GuestData } from "./guest-types";
 
 function StatCard({
@@ -52,20 +52,14 @@ function StatCard({
 
 export default function SummaryBar({ guests }: { guests: GuestData[] }) {
   const total = guests.length;
-  const mustPay = guests.filter(owesPayment);
-  const paidCount = guests.filter((g) => g.hasPaid).length;
   const confirmedCount = guests.filter((g) => g.rsvpStatus === "CONFIRMED").length;
-  const collected = mustPay
-    .filter((g) => g.hasPaid)
-    .reduce((sum, g) => sum + (g.amount ?? 0), 0);
-  const pending = mustPay
-    .filter((g) => !g.hasPaid)
-    .reduce((sum, g) => sum + (g.amount ?? 0), 0);
+  const { payableCount, paidPayableCount, collected, pending } =
+    computePaymentStats(guests);
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
       <StatCard icon={Users} label="Guests" value={total} />
-      <StatCard icon={Wallet} label="Must pay" value={mustPay.length} />
+      <StatCard icon={Wallet} label="Must pay" value={payableCount} />
       <StatCard
         icon={UserCheck}
         label="Confirmed"
@@ -75,7 +69,7 @@ export default function SummaryBar({ guests }: { guests: GuestData[] }) {
       <StatCard
         icon={CheckCircle2}
         label="Paid"
-        value={`${paidCount}/${mustPay.length}`}
+        value={`${paidPayableCount}/${payableCount}`}
         iconClassName="bg-emerald-500/10 text-emerald-400"
       />
       <StatCard

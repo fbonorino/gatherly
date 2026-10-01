@@ -11,6 +11,7 @@ import {
 } from "@/lib/types";
 import { initials, type GuestData } from "./guest-types";
 import { formatCurrency } from "@/lib/currency";
+import { canOwePayment, paymentStatus } from "@/lib/payments";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -43,6 +44,7 @@ export default function GuestCard({
   onDelete,
 }: GuestCardProps) {
   const [, startTransition] = useTransition();
+  const status = paymentStatus(guest);
 
   return (
     <Card className="py-3 gap-2">
@@ -56,41 +58,47 @@ export default function GuestCard({
         <div className="min-w-0 flex-1 space-y-1">
           <div className="flex items-start justify-between gap-2">
             <p className="font-medium leading-tight truncate">{guest.name}</p>
-            <button
-              onClick={() =>
-                startTransition(() => onTogglePaid(guest.id, !guest.hasPaid))
-              }
-              className="shrink-0"
-            >
-              <Badge
-                className={
-                  guest.hasPaid
-                    ? "bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 cursor-pointer"
-                    : "bg-amber-500/20 text-amber-400 hover:bg-amber-500/30 cursor-pointer"
+            {status !== "NONE" && (
+              <button
+                onClick={() =>
+                  startTransition(() => onTogglePaid(guest.id, !guest.hasPaid))
                 }
+                className="shrink-0"
               >
-                {guest.hasPaid ? "Paid" : "Pending"}
-              </Badge>
-            </button>
+                <Badge
+                  className={
+                    status === "PAID"
+                      ? "bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 cursor-pointer"
+                      : "bg-amber-500/20 text-amber-400 hover:bg-amber-500/30 cursor-pointer"
+                  }
+                >
+                  {status === "PAID" ? "Paid" : "Pending"}
+                </Badge>
+              </button>
+            )}
           </div>
 
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <span>{GENDER_LABELS[guest.gender]}</span>
-            <span>·</span>
-            <span className="flex items-center gap-1.5">
-              Must pay
-              <Switch
-                size="sm"
-                checked={guest.mustPay}
-                onCheckedChange={(checked) =>
-                  startTransition(() => onMustPayChange(guest.id, checked))
-                }
-                aria-label={`Toggle must pay for ${guest.name}`}
-              />
-              {guest.mustPay &&
-                guest.amount != null &&
-                formatCurrency(guest.amount)}
-            </span>
+            {canOwePayment(guest.rsvpStatus) && (
+              <>
+                <span>·</span>
+                <span className="flex items-center gap-1.5">
+                  Must pay
+                  <Switch
+                    size="sm"
+                    checked={guest.mustPay}
+                    onCheckedChange={(checked) =>
+                      startTransition(() => onMustPayChange(guest.id, checked))
+                    }
+                    aria-label={`Toggle must pay for ${guest.name}`}
+                  />
+                  {guest.mustPay &&
+                    guest.amount != null &&
+                    formatCurrency(guest.amount)}
+                </span>
+              </>
+            )}
           </div>
 
           <Select

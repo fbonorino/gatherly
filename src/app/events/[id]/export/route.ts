@@ -1,8 +1,20 @@
 import { NextResponse } from "next/server";
 import type { Gender, RsvpStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { owesPayment } from "@/lib/rsvp";
-import { GENDER_LABELS, GENDERS, RSVP_STATUSES } from "@/lib/types";
+import {
+  canOwePayment,
+  computePaymentStats,
+  isPayable,
+  matchesPaymentFilter,
+  parsePaymentFilter,
+  paymentStatus,
+} from "@/lib/payments";
+import {
+  GENDER_LABELS,
+  GENDERS,
+  RSVP_STATUS_LABELS,
+  RSVP_STATUSES,
+} from "@/lib/types";
 
 function csvEscape(value: string) {
   if (/[",\n]/.test(value)) {
@@ -39,21 +51,20 @@ export async function GET(
   const rsvpFilter = RSVP_STATUSES.includes(rsvpParam as RsvpStatus)
     ? (rsvpParam as RsvpStatus)
     : null;
-  const paymentFilter =
-    paymentParam === "PAID" || paymentParam === "PENDING" ? paymentParam : null;
+  const paymentFilter = parsePaymentFilter(paymentParam);
 
   const guests = event.guests.filter((g) => {
     if (search && !g.name.toLowerCase().includes(search)) return false;
     if (genderFilter && g.gender !== genderFilter) return false;
     if (rsvpFilter && g.rsvpStatus !== rsvpFilter) return false;
-    if (paymentFilter === "PAID" && !g.hasPaid) return false;
-    if (paymentFilter === "PENDING" && g.hasPaid) return false;
+    if (!matchesPaymentFilter(g, paymentFilter)) return false;
     return true;
   });
 
   const header = [
     "Name",
     "Gender",
+    "RSVP",
     "Must Pay",
     "Paid",
     "Amount",
@@ -62,38 +73,40 @@ export async function GET(
     "Status",
   ];
 
-  let totalRecaudado = 0;
-  let totalPendiente = 0;
-
   const rows = guests.map((g) => {
-    const amount = g.amount ?? 0;
-    const paidAmount = g.hasPaid ? amount : 0;
-    const owes = owesPayment(g);
-    const balance = owes ? amount - paidAmount : 0;
+    const canOwe = canOwePayment(g.rsvpStatus);
+    const payable = isPayable(g);
+    const status = paymentStatus(g);
+    // Balance still owed; only payable guests who haven't paid owe anything.
+    const balance = status === "PENDING" ? (g.amount ?? 0) : 0;
 
-    const status = !g.mustPay
-      ? "Exento"
-      : !owes
-        ? "Declinado"
-        : g.hasPaid
-          ? "Pagado"
-          : "Pendiente";
+    const statusLabel =
+      status === "PAID"
+        ? "Pagado"
+        : status === "PENDING"
+          ? "Pendiente"
+          : !canOwe
+            ? g.rsvpStatus === "DECLINED"
+              ? "Declinado"
+              : "Sin confirmar"
+            : "Exento";
 
-    totalRecaudado += paidAmount;
-    if (owes && !g.hasPaid) totalPendiente += balance;
-
+    // Must Pay / Paid / Amount are left empty when they don't apply (guest
+    // not confirmed), except that a recorded payment is always shown.
     return [
       g.name,
       GENDER_LABELS[g.gender],
-      g.mustPay ? "Yes" : "No",
-      g.hasPaid ? "Yes" : "No",
-      g.amount != null ? String(g.amount) : "",
+      RSVP_STATUS_LABELS[g.rsvpStatus],
+      canOwe ? (g.mustPay ? "Yes" : "No") : "",
+      status === "PAID" ? "Yes" : payable ? "No" : "",
+      (payable || g.hasPaid) && g.amount != null ? String(g.amount) : "",
       g.comments ?? "",
       String(balance),
-      status,
+      statusLabel,
     ];
   });
 
+  const { collected, pending } = computePaymentStats(guests);
   const totalsRow = [
     `Total guests: ${guests.length}`,
     "",
@@ -101,8 +114,9 @@ export async function GET(
     "",
     "",
     "",
-    `Recaudado: ${totalRecaudado}`,
-    `Pendiente: ${totalPendiente}`,
+    "",
+    `Recaudado: ${collected}`,
+    `Pendiente: ${pending}`,
   ];
 
   const csv = [header, ...rows, totalsRow]
@@ -114,7 +128,7 @@ export async function GET(
     search && "search",
     genderFilter,
     rsvpFilter,
-    paymentFilter,
+    paymentFilter !== "ALL" && paymentFilter,
   ].filter(Boolean);
   const filterSuffix = filterSuffixParts.length
     ? `-${filterSuffixParts.join("-").toLowerCase()}`

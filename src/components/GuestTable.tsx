@@ -11,6 +11,7 @@ import {
   RSVP_STATUSES,
 } from "@/lib/types";
 import { resolveRsvpStatus } from "@/lib/rsvp";
+import { matchesPaymentFilter, type PaymentFilter } from "@/lib/payments";
 import type { GuestData } from "./guest-types";
 import GuestRow from "./GuestRow";
 import GuestCard from "./GuestCard";
@@ -41,8 +42,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-type PaymentFilter = "ALL" | "PAID" | "PENDING";
-
 export default function GuestTable({
   eventId,
   initialGuests,
@@ -65,8 +64,7 @@ export default function GuestTable({
       }
       if (genderFilter !== "ALL" && g.gender !== genderFilter) return false;
       if (rsvpFilter !== "ALL" && g.rsvpStatus !== rsvpFilter) return false;
-      if (paymentFilter === "PAID" && !g.hasPaid) return false;
-      if (paymentFilter === "PENDING" && g.hasPaid) return false;
+      if (!matchesPaymentFilter(g, paymentFilter)) return false;
       return true;
     });
   }, [guests, search, genderFilter, rsvpFilter, paymentFilter]);
@@ -122,7 +120,13 @@ export default function GuestTable({
   async function handleRsvpChange(guestId: string, rsvpStatus: RsvpStatus) {
     const previous = guests.find((g) => g.id === guestId);
     setGuests((prev) =>
-      prev.map((g) => (g.id === guestId ? { ...g, rsvpStatus } : g))
+      // Mirror the server rule (paid guests stay CONFIRMED) so local state,
+      // the payable toggle and the stats never diverge from what is stored.
+      prev.map((g) =>
+        g.id === guestId
+          ? { ...g, rsvpStatus: resolveRsvpStatus(g.hasPaid, rsvpStatus) }
+          : g
+      )
     );
     try {
       await updateGuestRsvpStatus(guestId, eventId, rsvpStatus);

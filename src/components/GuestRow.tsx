@@ -11,6 +11,7 @@ import {
 } from "@/lib/types";
 import { initials, type GuestData } from "./guest-types";
 import { formatCurrency } from "@/lib/currency";
+import { canOwePayment, paymentStatus } from "@/lib/payments";
 import { TableRow, TableCell } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -45,6 +46,7 @@ export default function GuestRow({
   onDelete,
 }: GuestRowProps) {
   const [, startTransition] = useTransition();
+  const status = paymentStatus(guest);
 
   return (
     <TableRow className={index % 2 === 1 ? "bg-muted/50" : undefined}>
@@ -91,37 +93,45 @@ export default function GuestRow({
         </Select>
       </TableCell>
       <TableCell className="text-center">
-        <div className="flex items-center justify-center gap-1.5">
-          <Switch
-            checked={guest.mustPay}
-            onCheckedChange={(checked) =>
-              startTransition(() => onMustPayChange(guest.id, checked))
-            }
-            aria-label={`Toggle must pay for ${guest.name}`}
-          />
-          {guest.mustPay && guest.amount != null && (
-            <span className="text-muted-foreground text-xs">
-              {formatCurrency(guest.amount)}
-            </span>
-          )}
-        </div>
+        {canOwePayment(guest.rsvpStatus) ? (
+          <div className="flex items-center justify-center gap-1.5">
+            <Switch
+              checked={guest.mustPay}
+              onCheckedChange={(checked) =>
+                startTransition(() => onMustPayChange(guest.id, checked))
+              }
+              aria-label={`Toggle must pay for ${guest.name}`}
+            />
+            {guest.mustPay && guest.amount != null && (
+              <span className="text-muted-foreground text-xs">
+                {formatCurrency(guest.amount)}
+              </span>
+            )}
+          </div>
+        ) : (
+          <span className="text-muted-foreground">—</span>
+        )}
       </TableCell>
       <TableCell className="text-center">
-        <button
-          onClick={() =>
-            startTransition(() => onTogglePaid(guest.id, !guest.hasPaid))
-          }
-        >
-          <Badge
-            className={
-              guest.hasPaid
-                ? "bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 cursor-pointer"
-                : "bg-amber-500/20 text-amber-400 hover:bg-amber-500/30 cursor-pointer"
+        {status === "NONE" ? (
+          <span className="text-muted-foreground">—</span>
+        ) : (
+          <button
+            onClick={() =>
+              startTransition(() => onTogglePaid(guest.id, !guest.hasPaid))
             }
           >
-            {guest.hasPaid ? "Paid" : "Pending"}
-          </Badge>
-        </button>
+            <Badge
+              className={
+                status === "PAID"
+                  ? "bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 cursor-pointer"
+                  : "bg-amber-500/20 text-amber-400 hover:bg-amber-500/30 cursor-pointer"
+              }
+            >
+              {status === "PAID" ? "Paid" : "Pending"}
+            </Badge>
+          </button>
+        )}
       </TableCell>
       <TableCell className="text-muted-foreground max-w-40 truncate">
         {guest.comments}
