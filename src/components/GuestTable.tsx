@@ -217,7 +217,14 @@ export default function GuestTable({
             onValueChange={(v) => setGenderFilter(v as Gender | "ALL")}
           >
             <SelectTrigger className="w-full lg:w-44">
-              <SelectValue />
+              <SelectValue>
+                {() => (
+                  <>
+                    <span className="text-muted-foreground">Gender:</span>
+                    {genderFilter === "ALL" ? "All" : GENDER_LABELS[genderFilter]}
+                  </>
+                )}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="ALL">All genders</SelectItem>
@@ -233,7 +240,14 @@ export default function GuestTable({
             onValueChange={(v) => setRsvpFilter(v as RsvpStatus | "ALL")}
           >
             <SelectTrigger className="w-full lg:w-44">
-              <SelectValue />
+              <SelectValue>
+                {() => (
+                  <>
+                    <span className="text-muted-foreground">RSVP:</span>
+                    {rsvpFilter === "ALL" ? "All" : RSVP_STATUS_LABELS[rsvpFilter]}
+                  </>
+                )}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="ALL">All RSVP status</SelectItem>
@@ -249,7 +263,14 @@ export default function GuestTable({
             onValueChange={(v) => setPaymentFilter(v as PaymentFilter)}
           >
             <SelectTrigger className="w-full lg:w-44">
-              <SelectValue />
+              <SelectValue>
+                {() => (
+                  <>
+                    <span className="text-muted-foreground">Payment:</span>
+                    {paymentFilter === "ALL" ? "All" : paymentFilter === "PAID" ? "Paid" : "Pending"}
+                  </>
+                )}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="ALL">All payment status</SelectItem>
