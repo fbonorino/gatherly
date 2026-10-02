@@ -216,7 +216,7 @@ export default function GuestTable({
             value={genderFilter}
             onValueChange={(v) => setGenderFilter(v as Gender | "ALL")}
           >
-            <SelectTrigger className="w-full lg:w-44">
+            <SelectTrigger aria-label="Filter by gender" className="w-full lg:w-44">
               <SelectValue>
                 {() => (
                   <>
@@ -227,7 +227,7 @@ export default function GuestTable({
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="ALL">All genders</SelectItem>
+              <SelectItem value="ALL">All</SelectItem>
               {GENDERS.map((g) => (
                 <SelectItem key={g} value={g}>
                   {GENDER_LABELS[g]}
@@ -239,7 +239,7 @@ export default function GuestTable({
             value={rsvpFilter}
             onValueChange={(v) => setRsvpFilter(v as RsvpStatus | "ALL")}
           >
-            <SelectTrigger className="w-full lg:w-44">
+            <SelectTrigger aria-label="Filter by RSVP status" className="w-full lg:w-44">
               <SelectValue>
                 {() => (
                   <>
@@ -250,7 +250,7 @@ export default function GuestTable({
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="ALL">All RSVP status</SelectItem>
+              <SelectItem value="ALL">All</SelectItem>
               {RSVP_STATUSES.map((status) => (
                 <SelectItem key={status} value={status}>
                   {RSVP_STATUS_LABELS[status]}
@@ -262,7 +262,7 @@ export default function GuestTable({
             value={paymentFilter}
             onValueChange={(v) => setPaymentFilter(v as PaymentFilter)}
           >
-            <SelectTrigger className="w-full lg:w-44">
+            <SelectTrigger aria-label="Filter by payment status" className="w-full lg:w-44">
               <SelectValue>
                 {() => (
                   <>
@@ -273,7 +273,7 @@ export default function GuestTable({
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="ALL">All payment status</SelectItem>
+              <SelectItem value="ALL">All</SelectItem>
               <SelectItem value="PAID">Paid</SelectItem>
               <SelectItem value="PENDING">Pending</SelectItem>
             </SelectContent>
